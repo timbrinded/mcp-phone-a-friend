@@ -1,0 +1,13 @@
+[install]
+# Configure bun install
+cache = false
+exact = true
+
+[test]
+# Configure bun test
+preload = []
+timeout = 30000
+
+[run]
+# Configure bun run
+shell = "/bin/bash"
