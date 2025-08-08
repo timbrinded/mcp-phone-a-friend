@@ -2,353 +2,267 @@
 
 ## 📊 Progress Status
 **Last Updated:** 2025-08-08
-- **Phase 1.1 Project Setup:** ✅ COMPLETED
-- **Phase 1.2 Schema Definitions:** ✅ COMPLETED  
-- **Current Phase:** Phase 1.3 Core Services Setup
-- **Runtime:** Bun (ESM-only)
-- **Architecture:** Effect-TS Services
+- **Current Phase:** Day 1 - Core Implementation
+- **Runtime:** Bun/Node.js
+- **Architecture:** Simple, Direct MCP SDK Implementation
+- **Timeline:** 2 Days Total
 
 ## Overview
-Build a TypeScript MCP (Model Context Protocol) server using Effect-TS services architecture that bridges AI models using the Vercel AI SDK, allowing AI agents to consult other models for advice.
+Build a simple, maintainable MCP (Model Context Protocol) server that bridges AI models using the Vercel AI SDK, allowing AI agents to consult other models for advice. Follows MCP best practices for local servers.
 
 ## Architecture Principles
-- **Effect-TS Service Architecture**: Use Effect-TS services for dependency injection and type-safe effects
-- **MCP Protocol 2025-06-18**: Full compliance with latest MCP specification
-- **Type Safety**: Full TypeScript with runtime validation using Zod and Effect-TS Schema
-- **Streaming-First**: Design all APIs for streaming using Effect streams
-- **Graceful Error Handling**: Effect-TS error management with structured failures
-- **Bun Runtime**: Leverage Bun's built-in capabilities (SQLite, native TypeScript)
+- **Simplicity First**: Direct implementation using official MCP SDK
+- **No Over-Engineering**: Avoid unnecessary abstractions and frameworks
+- **MCP Protocol Compliance**: Full compliance with MCP 2025-06-18 specification
+- **Promise-Based**: Direct async/await with Vercel AI SDK
+- **Local-First**: Optimized for stdio transport and local use
 
 ## Project Structure
 ```
 phone-a-friend-mcp/
 ├── src/
-│   ├── index.ts                 # MCP server entry point with Effect runtime
-│   ├── server.ts                # Core MCP server implementation with Effect
-│   ├── services/
-│   │   ├── mcp.service.ts       # MCP server service definition
-│   │   ├── provider.service.ts  # AI provider service interface
-│   │   ├── cache.service.ts     # SQLite caching service
-│   │   ├── rate-limiter.service.ts # Rate limiting service
-│   │   ├── model-discovery.service.ts # Model discovery service
-│   │   └── index.ts             # Service exports
-│   ├── providers/
-│   │   ├── openai.provider.ts   # OpenAI Effect service implementation
-│   │   ├── gemini.provider.ts   # Google Gemini Effect service
-│   │   ├── xai.provider.ts      # X.AI Effect service
-│   │   └── index.ts             # Provider exports
-│   ├── tools/
-│   │   ├── models.tool.ts       # /models discovery tool with Effect
-│   │   └── advice.tool.ts       # /advice consultation tool with Effect
-│   ├── layers/
-│   │   ├── providers.layer.ts   # Provider service layers
-│   │   ├── cache.layer.ts       # Cache service layer
-│   │   ├── config.layer.ts      # Configuration layer
-│   │   └── index.ts             # Layer exports
-│   ├── schemas/
-│   │   ├── mcp.schema.ts        # MCP protocol schemas (Schema module)
-│   │   ├── providers.schema.ts  # Provider request/response schemas
-│   │   └── index.ts             # Schema exports
-│   ├── config/
-│   │   ├── constants.ts         # API endpoints, model mappings
-│   │   └── prompts.ts           # Advice prompt templates
-│   └── utils/
-│       ├── environment.ts       # Environment Effect service
-│       ├── errors.ts            # Effect error classes
-│       └── streams.ts           # Effect stream utilities
+│   ├── index.ts          # Entry point
+│   ├── server.ts         # MCP server implementation
+│   ├── providers.ts      # AI provider setup
+│   ├── tools.ts          # MCP tool implementations
+│   └── config.ts         # Configuration and environment
 ├── tests/
-│   ├── unit/
-│   │   ├── services/
-│   │   ├── providers/
-│   │   └── tools/
-│   └── integration/
-│       └── mcp-server.test.ts
+│   └── server.test.ts    # Basic tests
 ├── package.json
 ├── tsconfig.json
-├── bunfig.toml
 ├── .env.example
 └── README.md
 ```
 
 ## Implementation Tasks
 
-### Phase 1: Foundation (Days 1-2)
+### Day 1: Core Implementation (8 hours)
 
-- [x] **1.1 Project Setup** ✅ COMPLETED
-  - ✅ Initialize Bun project with TypeScript
-  - ✅ Configure tsconfig.json for strict type checking
-  - ✅ Install core dependencies:
+#### Morning (4 hours)
+- [x] **1.1 Project Setup** (30 min)
+  - Initialize project with TypeScript
+  - Install dependencies:
     ```bash
-    # Installed: @modelcontextprotocol/sdk ai @ai-sdk/openai effect @effect/schema
-    # Dev deps: @types/bun typescript
+    bun add @modelcontextprotocol/sdk ai @ai-sdk/openai @ai-sdk/google @ai-sdk/anthropic
+    bun add -d @types/node typescript
     ```
-  - ✅ Set up Effect-TS project structure with services and layers
-  - ✅ Converted to ESM-only (removed CommonJS)
-  - ✅ Converted to Bun-only runtime (removed Node.js dependencies)
-  - ✅ Configured Bun test runner
+  - Configure tsconfig.json for ES modules
+  - Set up basic project structure
 
-- [x] **1.2 Schema Definitions** ✅ COMPLETED
-  - ✅ Define Effect Schema for MCP protocol compliance (2025-06-18)
-  - ✅ Create provider request/response schemas using @effect/schema
-  - ✅ Implement model capability normalization schemas
-  - ✅ Set up validation pipelines with Effect Schema decode
-  - ✅ Write comprehensive tests for all schemas (16 tests passing)
+- [x] **1.2 Basic MCP Server** (1.5 hours)
+  - Create server class using official SDK
+  - Implement stdio transport
+  - Set up basic server lifecycle (start/stop)
+  - Add console logging to stderr
 
-- [ ] **1.3 Core Services Setup**
-  - Define MCP server service interface using Effect Context.Tag
-  - Create base Effect runtime with proper error handling
-  - Set up service dependency graph with Effect layers
-  - Implement structured logging service with Effect
+- [x] **1.3 Provider Integration** (2 hours)
+  - Set up provider registry with Map
+  - Integrate OpenAI provider
+  - Add environment variable configuration
+  - Test basic text generation
 
-### Phase 2: Effect Services Architecture (Days 3-4)
-- [ ] **2.1 Provider Service Interface**
-  - Define ProviderService interface using Effect Context.Tag
-  - Create Effect-based provider capabilities (isAvailable, detectApiKey)
-  - Implement unified error handling with Effect error types
-  - Set up provider service dependency contracts
+#### Afternoon (4 hours)
+- [x] **1.4 Implement /models Tool** (1 hour)
+  - Register tool with MCP server
+  - Return list of available models
+  - Handle provider availability based on API keys
 
-- [ ] **2.2 Provider Registry Service**
-  - Implement ProviderRegistryService using Effect
-  - Add auto-discovery based on environment variables (Effect Config)
-  - Create provider factory pattern with Effect layers
-  - Handle provider initialization failures using Effect error management
+- [x] **1.5 Implement /advice Tool** (2 hours)
+  - Register tool with parameters schema
+  - Handle model selection
+  - Integrate Vercel AI SDK streaming
+  - Return formatted responses
 
-- [ ] **2.3 Environment Service**
-  - Create EnvironmentService using Effect Config
-  - Support multiple API key variants per provider with Effect Config.map
-  - Validate environment on startup using Effect Config validation
-  - Add .env.example with all supported keys
+- [x] **1.6 End-to-End Testing** (1 hour)
+  - Test with MCP inspector
+  - Verify tool registration
+  - Test actual AI responses
+  - Fix any issues found
 
-### Phase 3: Provider Service Implementations (Days 5-6)
-- [ ] **3.1 OpenAI Provider Service**
-  - Implement OpenAIProviderService as Effect service with Vercel AI SDK
-  - Add model list using Effect (hardcoded initially)
-  - Create Effect-based text generation with proper error handling
-  - Implement streaming support using Effect Streams
+### Day 2: Polish & Release (8 hours)
 
-- [ ] **3.2 Gemini Provider Service**
-  - Implement GeminiProviderService using Effect (use @ai-sdk/google@1.2.22)
-  - Handle Gemini-specific model naming with Effect Config
-  - Add fallback for missing list endpoint using Effect tryOrElse
-  - Test with sample requests using Effect test utilities
+#### Morning (4 hours)
+- [ ] **2.1 Multi-Provider Support** (2 hours)
+  - Add Google Gemini provider
+  - Add Anthropic Claude provider
+  - Add kimi moonshot provider
+  - Add xai grok provider
+  - Support provider-specific model naming
+  - Test all providers
 
-- [ ] **3.3 X.AI Provider Service**
-  - Implement XAIProviderService using Effect
-  - Support both XAI_API_KEY and GROK_API_KEY with Effect Config
-  - Add Grok model variants configuration
-  - Test integration with Effect test framework
+- [ ] **2.2 Error Handling** (2 hours)
+  - Add try-catch blocks for API calls
+  - Handle missing API keys gracefully
+  - Implement proper MCP error responses
+  - Add input validation
 
-### Phase 4: MCP Tool Implementation (Days 7-8)
-- [ ] **4.1 Models Discovery Tool**
-  - Implement /models tool handler using Effect and MCP 2025-06-18 spec
-  - Query all available providers in parallel using Effect.allWith
-  - Normalize model information using Effect Schema
-  - Return aggregated model list with MCP-compliant capabilities
+#### Afternoon (4 hours)
+- [ ] **2.3 Configuration** (1 hour)
+  - Create .env.example file
+  - Support multiple API key formats
+  - Add model configuration
+  - Document environment variables
 
-- [ ] **4.2 Advice Tool**
-  - Implement /advice tool handler with Effect error management
-  - Parse model selection from request using Effect Schema
-  - Build specialized prompt templates with Effect Config
-  - Handle both streaming and non-streaming responses using Effect Streams
-  - Convert streams to MCP 2025-06-18 compatible format
+- [ ] **2.4 Documentation** (2 hours)
+  - Write comprehensive README
+  - Add usage examples
+  - Document supported models
+  - Create quick start guide
 
-- [ ] **4.3 Prompt Engineering Service**
-  - Create PromptService using Effect Context.Tag
-  - Add provider-specific prompt optimizations with Effect Config
-  - Implement request context preservation using Effect Ref
-  - Support custom system prompts through configuration
+## Code Examples
 
-### Phase 5: Performance & Resilience Services (Days 9-10)
-- [ ] **5.1 Caching Service**
-  - Implement CacheService using Effect and bun:sqlite
-  - Cache model lists with 10-minute TTL using Effect Schedule
-  - Add cache invalidation strategies with Effect Ref
-  - Persist cache across restarts using Effect Resource management
-
-- [ ] **5.2 Rate Limiting Service**
-  - Implement RateLimiterService using Effect and token bucket algorithm
-  - Add per-provider rate limits with Effect Config
-  - Support adaptive throttling using Effect Schedule
-  - Handle rate limit errors using Effect error channel
-
-- [ ] **5.3 Stream Handling Service**
-  - Implement proper backpressure handling with Effect Streams
-  - Convert Vercel AI streams to MCP format using Effect Stream transforms
-  - Add stream timeout protection using Effect.timeout
-  - Support partial stream recovery with Effect error handling
-
-- [ ] **5.4 Error Management**
-  - Create unified error taxonomy using Effect Data.TaggedError
-  - Map provider-specific errors to Effect error types
-  - Implement circuit breaker pattern with Effect Resource
-  - Add retry logic with exponential backoff using Effect Schedule
-
-### Phase 6: Testing & Documentation (Days 11-12)
-- [ ] **6.1 Effect Unit Tests**
-  - Test each provider service independently using Effect test utilities
-  - Mock API responses with Effect test layers
-  - Test error handling paths with Effect error simulation
-  - Verify type safety with Effect Schema validation
-
-- [ ] **6.2 Integration Tests**
-  - Test MCP server with actual requests using Effect test runtime
-  - Verify tool registration with MCP 2025-06-18 compliance
-  - Test streaming responses with Effect Stream testing
-  - Validate error responses using Effect error matching
-
-- [ ] **6.3 Documentation**
-  - Write comprehensive README with Effect architecture explanation
-  - Document service interfaces and layer composition
-  - Add usage examples with Effect runtime setup
-  - Create provider configuration guide for Effect Config
-
-### Phase 7: Production Hardening (Days 13-14)
-- [ ] **7.1 Observability Services**
-  - Add structured logging service with correlation IDs using Effect Logger
-  - Implement health check service with Effect Ref state tracking
-  - Add metrics collection service using Effect Metrics
-  - Create monitoring dashboard with Effect observability integration
-
-- [ ] **7.2 Security Services**
-  - Validate all external inputs using Effect Schema decode
-  - Sanitize API keys from logs with Effect Logger redact
-  - Implement request signing service with Effect crypto utilities
-  - Add audit logging service with Effect structured logging
-
-- [ ] **7.3 Performance Optimization**
-  - Profile and optimize hot paths using Effect tracing
-  - Implement connection pooling with Effect Resource pool
-  - Add request coalescing using Effect batching
-  - Optimize memory usage with Effect Resource management
-
-## Critical Implementation Details
-
-### Effect Config Environment Mapping
+### Simple Server Implementation
 ```typescript
-// Using Effect Config for environment variable management
-import { Config } from "effect"
+// src/server.ts
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 
-export const OpenAIConfig = Config.string("OPENAI_API_KEY")
-export const GeminiConfig = Config.first(
-  Config.string("GEMINI_API_KEY"),
-  Config.string("GOOGLE_API_KEY")
-)
-export const XAIConfig = Config.first(
-  Config.string("XAI_API_KEY"), 
-  Config.string("GROK_API_KEY")
-)
-export const AnthropicConfig = Config.string("ANTHROPIC_API_KEY")
-export const DeepSeekConfig = Config.string("DEEPSEEK_API_KEY")
+export class PhoneAFriendServer {
+  private server: Server;
+  private providers = new Map();
+
+  constructor() {
+    this.server = new Server({
+      name: 'phone-a-friend',
+      version: '1.0.0'
+    });
+  }
+
+  async start() {
+    this.setupProviders();
+    this.registerTools();
+    
+    const transport = new StdioServerTransport();
+    await this.server.connect(transport);
+    console.error('Phone-a-Friend MCP server started on stdio');
+  }
+
+  private setupProviders() {
+    // Simple, direct provider setup
+    if (process.env.OPENAI_API_KEY) {
+      this.providers.set('gpt-4', { /* provider config */ });
+    }
+  }
+
+  private registerTools() {
+    this.server.addTool({
+      name: 'models',
+      description: 'List available AI models',
+      inputSchema: { type: 'object', properties: {} },
+      handler: async () => this.listModels()
+    });
+
+    this.server.addTool({
+      name: 'advice',
+      description: 'Get advice from an AI model',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          model: { type: 'string' },
+          prompt: { type: 'string' }
+        },
+        required: ['model', 'prompt']
+      },
+      handler: async (args) => this.getAdvice(args.model, args.prompt)
+    });
+  }
+}
 ```
 
-### Effect Stream Conversion Pattern
+### Direct Vercel AI SDK Usage
 ```typescript
-// Converting provider streams to MCP format using Effect Streams
-import { Stream, Effect } from "effect"
+// src/tools.ts
+import { generateText } from 'ai';
+import { openai } from '@ai-sdk/openai';
 
-const providerStreamToMcp = (
-  stream: ReadableStream
-): Stream.Stream<string, StreamError> =>
-  Stream.fromReadableStream(() => stream, (error) => new StreamError({ cause: error }))
-    .pipe(
-      Stream.mapEffect(chunk => 
-        Effect.try(() => JSON.stringify(chunk) + "\n")
-          .pipe(Effect.mapError(error => new SerializationError({ cause: error })))
-      ),
-      Stream.rechunk(1024), // Handle backpressure
-      Stream.timeout("30 seconds") // Add timeout protection
-    )
+async getAdvice(modelId: string, prompt: string) {
+  const model = this.providers.get(modelId);
+  if (!model) {
+    throw new Error(`Model ${modelId} not available`);
+  }
+
+  const { text } = await generateText({
+    model: openai(modelId),
+    prompt
+  });
+
+  return { content: text };
+}
 ```
 
-### Effect Error Handling Pattern
-```typescript
-// Using Effect Data.TaggedError for structured error handling
-import { Data } from "effect"
+## Environment Variables
+```bash
+# .env.example
+# OpenAI
+OPENAI_API_KEY=sk-...
 
-export class MCPError extends Data.TaggedError("MCPError")<{
-  readonly code: string
-  readonly details?: unknown
-  readonly cause?: unknown
-}> {}
+# Google
+GOOGLE_API_KEY=... 
+# or
+GEMINI_API_KEY=...
 
-export class ProviderError extends Data.TaggedError("ProviderError")<{
-  readonly provider: string
-  readonly cause: unknown
-}> {}
+# Anthropic  
+ANTHROPIC_API_KEY=sk-ant-...
 
-export class StreamError extends Data.TaggedError("StreamError")<{
-  readonly cause: unknown
-}> {}
-
-export class ValidationError extends Data.TaggedError("ValidationError")<{
-  readonly issues: Array<{ path: string; message: string }>
-}> {}
+# X.AI
+XAI_API_KEY=...
+# or
+GROK_API_KEY=...
 ```
 
 ## Testing Commands
 ```bash
-# Run Effect unit tests  
-bun test
+# Run the server locally
+bun run src/index.ts
 
-# Test MCP server locally with inspector
+# Test with MCP inspector
 bunx @modelcontextprotocol/inspector
 
-# Test with MCP 2025-06-18 compliant requests
+# Test tool listing
 echo '{"jsonrpc":"2.0","method":"tools/list","id":1}' | bun run src/index.ts
 
-# Run Effect runtime with specific config
-OPENAI_API_KEY=test bun run src/index.ts
+# Run tests
+bun test
 ```
 
-## Key Dependencies & Versions
-- `@modelcontextprotocol/sdk`: Latest (MCP 2025-06-18 support)
-- `effect`: ^3.10.0 (Effect-TS for services architecture)
-- `@effect/schema`: ^0.77.0 (Schema validation and parsing)
-- `ai`: ^4.0.0 (Vercel AI SDK)
-- `@ai-sdk/openai`: Latest
-- `@ai-sdk/google`: 1.2.22 (CRITICAL: For AI SDK v4 compatibility)
-- `@ai-sdk/anthropic`: Latest
-- `bun`: >=1.0.0 (Runtime and package manager)
+## Key Dependencies
+- `@modelcontextprotocol/sdk`: Official MCP SDK
+- `ai`: Vercel AI SDK core
+- `@ai-sdk/openai`: OpenAI provider
+- `@ai-sdk/google`: Google provider
+- `@ai-sdk/anthropic`: Anthropic provider
+- `typescript`: Type checking
+- `bun` or `node`: Runtime
 
 ## Success Criteria
+- [ ] Server starts without errors
+- [ ] Tools are registered and discoverable
+- [ ] `/models` returns available models
+- [ ] `/advice` successfully queries each provider
+- [ ] Works with MCP inspector
+- [ ] Error handling prevents crashes
+- [ ] Documentation is clear and complete
+- [ ] Can be installed and run by others
 
-- [x] Bun runtime configured with TypeScript support ✅
-- [x] ESM-only build system working ✅
-- [x] Test framework configured (Bun test runner) ✅
-- [x] All Effect Schema validations pass for MCP 2025-06-18 compliance ✅
-- [ ] Effect runtime starts MCP server without errors
-- [ ] All services initialize properly through Effect layers
-- [ ] `/models` tool discovers all configured providers using Effect concurrency
-- [ ] `/advice` tool successfully queries each provider with Effect error handling
-- [ ] Streaming responses work correctly with Effect Streams
-- [ ] Effect test suite achieves >80% coverage
-- [ ] Documentation covers Effect architecture and service composition
-
-## Potential Pitfalls to Avoid
-1. **Effect Error Handling**: Always handle errors in the Effect error channel, never throw
-2. **MCP 2025-06-18 Compliance**: Ensure all tools/resources/prompts follow latest spec
-3. **Gemini SDK Version**: Must use @ai-sdk/google@1.2.22 for AI SDK v4 compatibility
-4. **Effect Streaming**: Use Effect Streams properly for backpressure and error handling
-5. **Service Dependencies**: Define all service dependencies correctly in Effect layers
-6. **Environment Variables**: Use Effect Config instead of direct Bun.env access
-7. **Effect Resource Management**: Properly acquire/release resources using Effect Resource
-8. **Schema Validation**: Always validate inputs/outputs using Effect Schema
+## What We're NOT Building
+- ❌ Effect-TS layers and services
+- ❌ SQLite caching
+- ❌ Rate limiting
+- ❌ Circuit breakers
+- ❌ Complex error taxonomies
+- ❌ Dependency injection
+- ❌ Service orchestration
+- ❌ 14 days of unnecessary complexity
 
 ## Notes
-- Start with OpenAI provider service as it has the most mature SDK support
-- Test Effect streaming early - retrofitting with Effect Streams is complex
-- Use `bunx @modelcontextprotocol/inspector` for MCP 2025-06-18 debugging
-- Keep provider services isolated using Effect Context.Tag for easy addition
-- Use Effect layers for clean dependency injection and testability
-- Consider Effect clustering for distributed caching in production
-- Follow Effect best practices for composable and maintainable services
+- Keep it simple - this is a local utility, not a distributed system
+- Follow patterns from official MCP examples
+- Test early and often with the MCP inspector
+- Focus on core functionality first
+- Only add complexity if users actually need it
 
 ## Resources
-- [MCP Specification 2025-06-18](https://modelcontextprotocol.io/specification/2025-06-18)
+- [MCP Specification](https://modelcontextprotocol.io/specification)
 - [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk)
-- [Effect-TS Documentation](https://effect.website/docs/getting-started/introduction)
-- [Effect-TS Services Guide](https://effect.website/docs/guides/context-management/services)
-- [Effect Schema Documentation](https://effect.website/docs/schema/introduction)
-- [Vercel AI SDK Documentation](https://ai-sdk.dev/docs/introduction)
-- [Bun Documentation](https://bun.sh/docs)
-- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
+- [Vercel AI SDK Docs](https://sdk.vercel.ai/docs)
+- [MCP Server Examples](https://github.com/modelcontextprotocol/servers)

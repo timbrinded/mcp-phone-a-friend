@@ -1,8 +1,30 @@
 {
-  "extends": "./tsconfig.base.json",
-  "include": [],
-  "references": [
-    { "path": "tsconfig.src.json" },
-    { "path": "tsconfig.test.json" }
-  ]
+  "compilerOptions": {
+    // Target modern JavaScript
+    "target": "ES2022",
+    "module": "ESNext",
+    "lib": ["ES2022"],
+    
+    // Module resolution
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
+    
+    // Type checking
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    
+    // Bun
+    "types": ["bun-types"],
+    
+    // Source maps for debugging
+    "sourceMap": true,
+    
+    // Base directory
+    "baseUrl": ".",
+    "rootDir": "src"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
 }

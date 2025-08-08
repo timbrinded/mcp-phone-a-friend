@@ -1,60 +1,33 @@
 {
-  "name": "@template/basic",
-  "version": "0.0.0",
+  "name": "phone-a-friend-mcp",
+  "version": "1.0.0",
   "type": "module",
   "packageManager": "bun@1.1.0",
   "license": "MIT",
-  "description": "A basic Effect package",
+  "description": "MCP server that bridges AI models for consultation",
   "repository": {
     "type": "git",
-    "url": "<PLACEHOLDER>"
+    "url": "https://github.com/yourusername/phone-a-friend-mcp"
   },
   "publishConfig": {
     "access": "public",
     "directory": "dist"
   },
   "scripts": {
-    "codegen": "build-utils prepare-v2",
-    "build": "bun run build-esm && bun run build-annotate && build-utils pack-v2",
-    "build-esm": "mkdir -p build/esm && bun build src/Program.ts src/demo.ts src/services/Simple.service.ts --outdir build/esm --target bun --format esm --sourcemap",
-    "build-annotate": "babel build/esm --plugins annotate-pure-calls --out-dir build/esm --source-maps",
-    "check": "bun --bun tsc --noEmit --project tsconfig.src.json",
-    "test": "bun test",
-    "coverage": "bun test --coverage",
-    "dev": "bun run --hot src/demo.ts",
-    "start": "bun run src/Program.ts"
+    "start": "bun run src/index.ts",
+    "dev": "bun run --hot src/index.ts",
+    "check": "bun --bun tsc --noEmit",
+    "test": "bun test-server.js"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^2.0.6",
-    "@effect/schema": "^0.75.5",
+    "@ai-sdk/anthropic": "^2.0.1",
+    "@ai-sdk/google": "^2.0.3",
+    "@ai-sdk/openai": "^2.0.7",
     "@modelcontextprotocol/sdk": "^1.17.2",
-    "ai": "^5.0.8",
-    "effect": "latest"
+    "ai": "^5.0.8"
   },
   "devDependencies": {
-    "@babel/cli": "^7.24.8",
-    "@babel/core": "^7.25.2",
-    "@effect/build-utils": "^0.7.7",
-    "@effect/language-service": "^0.1.0",
     "@types/bun": "^1.1.0",
-    "babel-plugin-annotate-pure-calls": "^0.4.0",
     "typescript": "^5.6.2"
-  },
-  "effect": {
-    "generateExports": {
-      "include": [
-        "**/*.ts"
-      ]
-    },
-    "generateIndex": {
-      "include": [
-        "**/*.ts"
-      ]
-    }
-  },
-  "pnpm": {
-    "patchedDependencies": {
-      "babel-plugin-annotate-pure-calls@0.4.0": "patches/babel-plugin-annotate-pure-calls@0.4.0.patch"
-    }
   }
 }
