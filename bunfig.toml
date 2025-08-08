@@ -10,4 +10,4 @@ timeout = 30000
 
 [run]
 # Configure bun run
-shell = "/bin/bash"
+shell = "bun"
