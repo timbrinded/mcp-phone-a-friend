@@ -18,7 +18,7 @@
     "build": "bun run build-esm && bun run build-annotate && build-utils pack-v2",
     "build-esm": "mkdir -p build/esm && bun build src/Program.ts src/demo.ts src/services/Simple.service.ts --outdir build/esm --target bun --format esm --sourcemap",
     "build-annotate": "babel build/esm --plugins annotate-pure-calls --out-dir build/esm --source-maps",
-    "check": "bun --bun tsc --noEmit",
+    "check": "bun --bun tsc --noEmit --project tsconfig.src.json",
     "test": "bun test",
     "coverage": "bun test --coverage",
     "dev": "bun run --hot src/demo.ts",

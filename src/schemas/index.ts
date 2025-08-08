@@ -4,7 +4,7 @@
  */
 
 import { Schema, ParseResult, TreeFormatter } from "@effect/schema"
-import { Effect, pipe, Either } from "effect"
+import { Effect, Either } from "effect"
 
 // Re-export all schemas
 export * from "./mcp.schema.js"
