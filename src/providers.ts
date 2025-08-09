@@ -1,6 +1,7 @@
 import { createOpenAI } from '@ai-sdk/openai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { createAnthropic } from '@ai-sdk/anthropic';
+import { createXai } from '@ai-sdk/xai';
 import { config } from './config.js';
 
 export interface ProviderInfo {
@@ -48,6 +49,20 @@ export function setupProviders(): Map<string, ProviderInfo> {
     config.anthropic.models.forEach(model => {
       providers.set(`anthropic:${model}`, {
         provider: anthropic(model),
+        models: [model]
+      });
+    });
+  }
+
+  // XAI (Grok)
+  if (config.xai.apiKey) {
+    const xai = createXai({
+      apiKey: config.xai.apiKey
+    });
+    
+    config.xai.models.forEach(model => {
+      providers.set(`xai:${model}`, {
+        provider: xai(model),
         models: [model]
       });
     });

@@ -4,12 +4,16 @@ A simple MCP (Model Context Protocol) server that bridges AI models using the Ve
 
 ## Features
 
-- 🤖 Support for multiple AI providers (OpenAI, Google, Anthropic)
+- 🤖 Support for multiple AI providers (OpenAI, Google, Anthropic, xAI)
 - 🔧 Simple MCP tools for model discovery and consultation
 - 📡 Standard stdio transport for local use
 - ⚡ Built with Bun for fast performance
+- 🛡️ Comprehensive error handling with MCP-compliant responses
+- ✅ Input validation for all tool parameters
 
 ## Installation
+
+### From Source
 
 ```bash
 # Clone the repository
@@ -18,6 +22,17 @@ cd phone-a-friend-mcp
 
 # Install dependencies
 bun install
+
+# Link for global use (optional)
+bun link
+```
+
+### Global Installation
+
+After linking, you can run the server from anywhere:
+
+```bash
+phone-a-friend
 ```
 
 ## Configuration
@@ -35,6 +50,11 @@ export GEMINI_API_KEY=...
 
 # Anthropic
 export ANTHROPIC_API_KEY=sk-ant-...
+
+# xAI (Grok)
+export XAI_API_KEY=xai-...
+# or
+export GROK_API_KEY=xai-...
 ```
 
 ## Usage
@@ -100,6 +120,53 @@ Add to your Claude Desktop configuration:
 - claude-3-5-sonnet-20241022
 - claude-3-opus-20240229
 - claude-3-haiku-20240307
+
+### xAI (Grok)
+- grok-beta
+- grok-2
+- grok-2-mini
+
+## Troubleshooting
+
+### No providers configured
+
+If you see "No AI providers configured" when starting the server, ensure you have set at least one API key as an environment variable.
+
+### Model not found
+
+When calling the `advice` tool, make sure to use the full model ID format: `provider:model-name`, for example:
+- `openai:gpt-4o`
+- `google:gemini-1.5-pro`
+- `anthropic:claude-3-5-sonnet-20241022`
+- `xai:grok-2`
+
+### Rate limit errors
+
+If you encounter rate limit errors, the server will return an MCP-compliant error with code `-32003`. Consider:
+- Using a different provider
+- Waiting before retrying
+- Checking your API plan limits
+
+### API key issues
+
+Invalid or missing API keys will result in error code `-32002`. Verify:
+- Your API key is correctly set in environment variables
+- The API key has not expired
+- You have the necessary permissions for the requested model
+
+## Development
+
+### Running Tests
+
+```bash
+bun test
+```
+
+### Type Checking
+
+```bash
+bun run check
+```
 
 ## License
 
