@@ -13,7 +13,7 @@ export function setupProviders(): Map<string, ProviderInfo> {
   const providers = new Map<string, ProviderInfo>();
 
   // OpenAI
-  if (config.openai.apiKey) {
+  if (config.openai.apiKey && config.openai.apiKey.trim()) {
     const openai = createOpenAI({
       apiKey: config.openai.apiKey
     });
@@ -27,7 +27,7 @@ export function setupProviders(): Map<string, ProviderInfo> {
   }
 
   // Google
-  if (config.google.apiKey) {
+  if (config.google.apiKey && config.google.apiKey.trim()) {
     const google = createGoogleGenerativeAI({
       apiKey: config.google.apiKey
     });
@@ -41,7 +41,7 @@ export function setupProviders(): Map<string, ProviderInfo> {
   }
 
   // Anthropic
-  if (config.anthropic.apiKey) {
+  if (config.anthropic.apiKey && config.anthropic.apiKey.trim()) {
     const anthropic = createAnthropic({
       apiKey: config.anthropic.apiKey
     });
@@ -55,7 +55,7 @@ export function setupProviders(): Map<string, ProviderInfo> {
   }
 
   // XAI (Grok)
-  if (config.xai.apiKey) {
+  if (config.xai.apiKey && config.xai.apiKey.trim()) {
     const xai = createXai({
       apiKey: config.xai.apiKey
     });

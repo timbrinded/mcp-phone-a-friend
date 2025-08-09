@@ -23,8 +23,8 @@
     
     // Base directory
     "baseUrl": ".",
-    "rootDir": "src"
+    "rootDir": "."
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "test/*.ts"],
   "exclude": ["node_modules"]
 }
