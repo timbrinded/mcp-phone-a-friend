@@ -32,7 +32,7 @@ describe("MCP Integration Tests", () => {
       // Step 2: List tools
       response = await listTools(server);
       expect(response.result.tools).toBeArray();
-      expect(response.result.tools).toHaveLength(3);
+      expect(response.result.tools).toHaveLength(2);
       
       // Step 3: Call models tool
       response = await callTool(server, "models");
@@ -41,8 +41,8 @@ describe("MCP Integration Tests", () => {
       expect(models).toContainKeys(["count", "models"]);
       expect(models.count).toBeGreaterThan(0);
       
-      // Step 4: Call models-status tool
-      response = await callTool(server, "models-status");
+      // Step 4: Call models tool with detailed=true
+      response = await callTool(server, "models", { detailed: true });
       const status = JSON.parse(response.result.content[0].text);
       expect(status).toBeObject();
       expect(status).toContainKeys(["summary", "providers"]);
@@ -67,7 +67,7 @@ describe("MCP Integration Tests", () => {
       // Send multiple requests concurrently
       const promises = [
         callTool(server, "models"),
-        callTool(server, "models-status"),
+        callTool(server, "models", { detailed: true }),
         listTools(server)
       ];
       
@@ -103,8 +103,8 @@ describe("MCP Integration Tests", () => {
       }, 100);
       
       const request2 = sendRequest(server, "tools/call", {
-        name: "models-status",
-        arguments: {}
+        name: "models",
+        arguments: { detailed: true }
       }, 200);
       
       const [response1, response2] = await Promise.all([request1, request2]);
@@ -197,7 +197,7 @@ describe("MCP Integration Tests", () => {
       const responses = await Promise.all([
         callTool(server, "models"),                    // Valid
         callTool(server, "unknown-tool"),              // Invalid tool
-        callTool(server, "models-status"),             // Valid
+        callTool(server, "models", { detailed: true }), // Valid
         callTool(server, "advice", { model: "bad" })   // Invalid params
       ]);
       
@@ -232,7 +232,7 @@ describe("MCP Integration Tests", () => {
       // Should still list tools
       let response = await listTools(partialServer);
       expect(response.result.tools).toBeArray();
-      expect(response.result.tools).toHaveLength(3);
+      expect(response.result.tools).toHaveLength(2);
       
       // Models should only show OpenAI
       response = await callTool(partialServer, "models");
@@ -242,7 +242,7 @@ describe("MCP Integration Tests", () => {
       expect(models.models.every((m: string) => m.startsWith("openai:"))).toBeTrue();
       
       // Status should reflect partial configuration
-      response = await callTool(partialServer, "models-status");
+      response = await callTool(partialServer, "models", { detailed: true });
       const status = JSON.parse(response.result.content[0].text);
       expect(status).toBeObject();
       expect(status).toContainKeys(["summary", "providers"]);
@@ -275,7 +275,7 @@ describe("MCP Integration Tests", () => {
       expect(models.models).toBeArrayOfSize(0);
       
       // Status should show setup instructions
-      response = await callTool(noKeyServer, "models-status");
+      response = await callTool(noKeyServer, "models", { detailed: true });
       const status = JSON.parse(response.result.content[0].text);
       expect(status).toBeObject();
       expect(status).toContainKeys(["summary", "quickSetup"]);

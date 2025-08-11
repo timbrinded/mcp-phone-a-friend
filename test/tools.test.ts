@@ -30,7 +30,7 @@ describe("MCP Tools Tests", () => {
       expect(response.result).toBeDefined();
       expect(response.result.tools).toBeDefined();
       expect(Array.isArray(response.result.tools)).toBe(true);
-      expect(response.result.tools.length).toBe(3); // models, advice, models-status
+      expect(response.result.tools.length).toBe(2); // models, advice
     });
 
     test("should return tools with correct schema", async () => {
@@ -72,13 +72,13 @@ describe("MCP Tools Tests", () => {
       expect(adviceTool.inputSchema.required).toContain("prompt");
     });
 
-    test("should include models-status tool", async () => {
+    test("should include detailed parameter in models tool", async () => {
       const response = await listTools(server);
-      const statusTool = response.result.tools.find((t: any) => t.name === "models-status");
+      const modelsTool = response.result.tools.find((t: any) => t.name === "models");
       
-      expect(statusTool).toBeDefined();
-      expect(statusTool.description).toContain("status");
-      expect(statusTool.inputSchema.required.length).toBe(0);
+      expect(modelsTool).toBeDefined();
+      expect(modelsTool.inputSchema.properties.detailed).toBeDefined();
+      expect(modelsTool.description).toContain("detailed");
     });
   });
 
@@ -127,9 +127,9 @@ describe("MCP Tools Tests", () => {
     });
   });
 
-  describe("models-status tool", () => {
-    test("should show detailed provider status", async () => {
-      const response = await callTool(server, "models-status");
+  describe("models tool with detailed parameter", () => {
+    test("should show detailed provider status when detailed=true", async () => {
+      const response = await callTool(server, "models", { detailed: true });
       
       expect(isValidJsonRpcResponse(response)).toBe(true);
       expect(response.result).toBeDefined();
@@ -168,7 +168,7 @@ describe("MCP Tools Tests", () => {
       });
       await initializeServer(partialServer);
       
-      const response = await callTool(partialServer, "models-status");
+      const response = await callTool(partialServer, "models", { detailed: true });
       const status = JSON.parse(response.result.content[0].text);
       
       expect(status.providers.openai.configured).toBe(true);
@@ -195,7 +195,7 @@ describe("MCP Tools Tests", () => {
       });
       await initializeServer(noKeyServer);
       
-      const response = await callTool(noKeyServer, "models-status");
+      const response = await callTool(noKeyServer, "models", { detailed: true });
       const status = JSON.parse(response.result.content[0].text);
       
       expect(status.summary.readyToUse).toBe(false);
