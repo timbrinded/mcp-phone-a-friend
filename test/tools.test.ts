@@ -30,7 +30,7 @@ describe("MCP Tools Tests", () => {
       expect(response.result).toBeDefined();
       expect(response.result.tools).toBeDefined();
       expect(Array.isArray(response.result.tools)).toBe(true);
-      expect(response.result.tools.length).toBe(2); // models, advice
+      expect(response.result.tools.length).toBe(3); // models, advice, advice_async
     });
 
     test("should return tools with correct schema", async () => {

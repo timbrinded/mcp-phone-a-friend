@@ -75,13 +75,20 @@ export class PhoneAFriendServer {
       tools: [
         {
           name: 'models',
-          description: 'List available AI models. Use detailed=true for configuration status',
+          description: `List AI models with capabilities and performance characteristics.
+Models are categorized by their strengths:
+• Reasoning models: Deep thinking, complex analysis (o3, GPT-5, gemini-2.5-pro) - 60-120s+
+• Fast models: Quick responses, simple tasks (gpt-4o, gemini-flash) - 5-15s
+• Standard models: Balanced performance (gpt-4.1, claude-sonnet) - 15-30s
+• Structured output: Models that can return JSON responses reliably
+• Vision capable: Models that can process images
+Use 'detailed=true' to see full capabilities matrix, configuration status, and setup instructions`,
           inputSchema: {
             type: 'object',
             properties: {
               detailed: {
                 type: 'boolean',
-                description: 'Show detailed configuration status and setup instructions',
+                description: 'Show detailed configuration status, capabilities matrix, and setup instructions for each provider',
                 default: false
               }
             },
@@ -90,27 +97,74 @@ export class PhoneAFriendServer {
         },
         {
           name: 'advice',
-          description: 'Get advice from a specific AI model',
+          description: `Get expert advice from AI models with automatic capability detection.
+Best for: code review, debugging, architecture decisions, implementation guidance, explanations.
+
+Key features:
+• Automatic structured output detection - returns JSON when supported
+• Smart fallback to text for incompatible models
+• Response includes confidence scores and context requests
+• Optimized timeouts based on model type
+
+Response formats:
+• Structured (when supported): {response_type, response, confidence, context_needed}
+• Text fallback: Simple text response with metadata.fallback_mode=true
+
+Use 'advice_async' for complex reasoning tasks or multi-turn conversations`,
           inputSchema: {
             type: 'object',
             properties: {
               model: {
                 type: 'string',
-                description: 'The model ID to use (e.g., "openai:gpt-4o")'
+                description: `Model ID format: "provider:model-name"
+
+Examples by use case:
+• Fast responses (5-15s): "openai:gpt-4o", "google:gemini-2.5-flash"
+• Balanced (15-30s): "openai:gpt-4.1", "anthropic:claude-3-7-sonnet"
+• Deep reasoning (60-120s+): "openai:o3", "openai:gpt-5", "google:gemini-2.5-pro"
+
+Performance characteristics:
+• gpt-4o, gemini-flash: Instant responses, great for simple queries
+• gpt-4.1, claude-sonnet: Good balance of quality and speed
+• o3, gpt-5: Maximum intelligence, complex problem solving
+• gemini-2.5-pro: Built-in thinking process, excellent for analysis
+
+Choose based on complexity vs speed tradeoff`
               },
               prompt: {
                 type: 'string',
-                description: 'The prompt to send to the model'
+                description: `Your question or task for the model.
+
+Tips for better results:
+• Be specific and provide context
+• Include examples if relevant
+• Specify desired output format
+• For code: include language and framework
+• For debugging: include error messages and stack traces`
               },
               reasoningEffort: {
                 type: 'string',
                 enum: ['minimal', 'low', 'medium', 'high'],
-                description: 'Reasoning effort for OpenAI reasoning models (o3, GPT-5). Optional - uses model defaults if not specified'
+                description: `Controls reasoning depth for o3/GPT-5 models (ignored by others):
+
+• minimal: Quick analysis, basic logic (~30s) - simple bugs, syntax questions
+• low: Standard reasoning, some exploration (~60s) - typical coding tasks
+• medium: Deep analysis, multiple approaches (~90s) - complex debugging
+• high: Exhaustive reasoning, all angles (~120s+) - architecture decisions
+
+Higher effort = better quality but longer wait
+Default: model-specific optimal setting`
               },
               verbosity: {
                 type: 'string', 
                 enum: ['low', 'medium', 'high'],
-                description: 'Text verbosity for GPT-5 models. Optional - uses model defaults if not specified'
+                description: `Output detail level for GPT-5 models (ignored by others):
+
+• low: Concise, key points only - quick answers
+• medium: Balanced explanation - standard responses  
+• high: Detailed with examples - learning/documentation
+
+Default: 'low' for efficiency`
               }
             },
             required: ['model', 'prompt']
@@ -118,54 +172,93 @@ export class PhoneAFriendServer {
         },
         {
           name: 'advice_async',
-          description: 'Get advice asynchronously with conversation support and caching',
+          description: `Advanced async interface with multi-turn conversations and intelligent caching.
+Best for: Complex reasoning, long-running tasks, iterative refinement, context building.
+
+Key advantages over 'advice':
+• Multi-turn conversation support with context preservation
+• Request caching and deduplication
+• Non-blocking for long operations
+• Automatic context iteration (max 3 rounds)
+
+Conversation flow example:
+1. Initial prompt → response_type: 'needs_context' (missing info)
+2. Add context via additional_context → response_type: 'continue'
+3. Final clarification → response_type: 'complete'
+
+Error prevention:
+• Max 3 iterations to prevent infinite loops
+• Automatic context aggregation
+• Request deduplication for identical prompts`,
           inputSchema: {
             type: 'object',
             properties: {
               model: {
                 type: 'string',
-                description: 'The model ID to use (e.g., "openai:gpt-4o")'
+                description: `Model ID (same format as 'advice' tool).
+Recommended for async: reasoning models like o3, GPT-5, gemini-2.5-pro`
               },
               prompt: {
                 type: 'string',
-                description: 'The prompt to send to the model'
+                description: `Initial prompt or follow-up message in conversation.
+For follow-ups, reference previous context naturally.`
               },
               conversation_id: {
                 type: 'string',
-                description: 'Optional conversation ID for multi-turn conversations'
+                description: `Conversation ID for multi-turn dialogue.
+• Auto-generated UUID if not provided
+• Preserves context across multiple calls
+• Use same ID to continue conversation
+• Start fresh conversation with new ID or omit`
               },
               request_id: {
                 type: 'number',
-                description: 'Optional request ID to check status of existing request'
+                description: `Check status of existing async request.
+• Required for polling long-running operations
+• Returned in initial response metadata
+• Use to retrieve cached results`
               },
               check_status: {
                 type: 'boolean',
-                description: 'Check status of existing request (requires request_id)',
+                description: `Poll for request completion (requires request_id).
+Returns current status: pending, complete, or error`,
                 default: false
               },
               reasoning_effort: {
                 type: 'string',
                 enum: ['minimal', 'low', 'medium', 'high'],
-                description: 'Reasoning effort for OpenAI reasoning models'
+                description: `Same as 'advice' tool - controls o3/GPT-5 reasoning depth`
               },
               verbosity: {
                 type: 'string',
                 enum: ['low', 'medium', 'high'],
-                description: 'Text verbosity for GPT-5 models'
+                description: `Same as 'advice' tool - controls GPT-5 output detail`
               },
               temperature: {
                 type: 'number',
-                description: 'Temperature for response generation (0-2)',
+                description: `Response creativity (0-2):
+• 0: Deterministic, same response each time
+• 0.7: Balanced creativity (default)
+• 1.0: Creative responses
+• 2.0: Maximum randomness (may be incoherent)`,
                 minimum: 0,
                 maximum: 2
               },
               max_completion_tokens: {
                 type: 'number',
-                description: 'Maximum tokens in completion'
+                description: `Output length limit in tokens (~4 chars/token).
+• Short answer: 500 tokens
+• Standard: 2000 tokens (default)
+• Detailed: 4000 tokens
+• Maximum: model-specific limit`
               },
               wait_timeout_ms: {
                 type: 'number',
-                description: 'How long to wait for response in milliseconds',
+                description: `Max wait time before returning pending status.
+• Default: 30000ms (30s) for fast models
+• Reasoning models auto-extend to 120000ms
+• Set lower for quick status checks
+• Set higher for guaranteed completion`,
                 default: 30000
               }
             },

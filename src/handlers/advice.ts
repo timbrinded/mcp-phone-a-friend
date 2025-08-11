@@ -2,7 +2,7 @@ import { generateText, generateObject } from 'ai';
 import { randomUUID } from 'crypto';
 import { z } from 'zod';
 import { MCPError, ErrorCode, validateString, wrapProviderError } from '../errors.js';
-import { reasoningModels, structuredOutputModels, modelParameters } from '../config.js';
+import { reasoningModels, structuredOutputModels, modelParameters, modelCapabilities } from '../config.js';
 import type { ProviderInfo } from '../providers.js';
 import { 
   TTLCache, 
@@ -78,15 +78,22 @@ Always be specific about what context you need.`,
       metadata: {
         status: response.response_type === 'needs_context' ? 'needs_context' : 'complete',
         conversation_id: conversationId,
+        response_format: 'structured',
+        model_used: modelName,
         ...(response.response_type === 'needs_context' && {
           context_request: {
             needed: response.context_needed?.map(c => c.type) || [],
             questions: response.questions || [],
             iteration: iteration + 1,
-            details: response.context_needed
+            details: response.context_needed,
+            tip: 'Provide missing context via additional_context parameter'
           }
         }),
-        confidence: response.confidence
+        confidence: response.confidence,
+        capabilities_used: {
+          structured_output: true,
+          reasoning: reasoningModels.has(modelName.split(':')[1])
+        }
       }
     };
   } catch (error) {
@@ -122,7 +129,9 @@ async function fallbackToText(
     metadata: {
       status: 'complete' as const,
       conversation_id: conversationId,
-      fallback_mode: true
+      response_format: 'text',
+      fallback_mode: true,
+      tip: 'Response in text mode - structured output not available for this model'
     }
   };
 }
@@ -157,10 +166,19 @@ export async function handleAdvice(
   
   const providerInfo = providers.get(modelName);
   if (!providerInfo) {
+    const availableModels = Array.from(providers.keys());
+    const providerPrefix = modelName.includes(':') ? modelName.split(':')[0] : '';
+    const suggestedModels = availableModels.filter(m => m.startsWith(providerPrefix));
+    
     throw new MCPError(
-      `Model "${modelName}" not found. Available models: ${Array.from(providers.keys()).join(', ')}`,
+      `Model "${modelName}" not found. Available models: ${availableModels.join(', ')}`,
       ErrorCode.ModelNotFound,
-      { requestedModel: modelName, availableModels: Array.from(providers.keys()) }
+      { 
+        requestedModel: modelName,
+        availableModels,
+        suggestedModels: suggestedModels.length > 0 ? suggestedModels : availableModels.slice(0, 5),
+        tip: 'Use the "models" tool to list all available models with their capabilities'
+      }
     );
   }
   
@@ -277,6 +295,18 @@ export async function handleAdvice(
     
     return result;
   } catch (error) {
-    throw wrapProviderError(error, modelName);
+    // Add helpful context to errors
+    const enhancedError = wrapProviderError(error, modelName);
+    
+    // Add recovery suggestions based on error type
+    if ((error as any)?.status === 429) {
+      (enhancedError as any).tip = 'Rate limited - try a different model or wait before retrying';
+    } else if ((error as any)?.message?.includes('timeout')) {
+      (enhancedError as any).tip = 'Request timed out - try using advice_async for long-running operations or simplify your prompt';
+    } else if ((error as any)?.status >= 500) {
+      (enhancedError as any).tip = 'Provider service error - try a different provider or model';
+    }
+    
+    throw enhancedError;
   }
 }
