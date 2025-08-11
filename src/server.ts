@@ -4,6 +4,7 @@ import { setupProviders, type ProviderInfo } from './providers.js';
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import { MCPError, ErrorCode } from './errors.js';
 import { handleListModels, handleAdvice, handleModelsStatus } from './handlers/index.js';
+import { handleAsyncAdvice, closeStore } from './handlers/advice-async.js';
 
 export class PhoneAFriendServer {
   private server: Server;
@@ -26,6 +27,18 @@ export class PhoneAFriendServer {
     try {
       this.setupProviders();
       this.validateConfiguration();
+      
+      // Handle cleanup on exit
+      process.on('SIGINT', () => {
+        console.error('Shutting down...');
+        closeStore();
+        process.exit(0);
+      });
+      process.on('SIGTERM', () => {
+        console.error('Shutting down...');
+        closeStore();
+        process.exit(0);
+      });
       
       const transport = new StdioServerTransport();
       await this.server.connect(transport);
@@ -102,6 +115,62 @@ export class PhoneAFriendServer {
             },
             required: ['model', 'prompt']
           }
+        },
+        {
+          name: 'advice_async',
+          description: 'Get advice asynchronously with conversation support and caching',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              model: {
+                type: 'string',
+                description: 'The model ID to use (e.g., "openai:gpt-4o")'
+              },
+              prompt: {
+                type: 'string',
+                description: 'The prompt to send to the model'
+              },
+              conversation_id: {
+                type: 'string',
+                description: 'Optional conversation ID for multi-turn conversations'
+              },
+              request_id: {
+                type: 'number',
+                description: 'Optional request ID to check status of existing request'
+              },
+              check_status: {
+                type: 'boolean',
+                description: 'Check status of existing request (requires request_id)',
+                default: false
+              },
+              reasoning_effort: {
+                type: 'string',
+                enum: ['minimal', 'low', 'medium', 'high'],
+                description: 'Reasoning effort for OpenAI reasoning models'
+              },
+              verbosity: {
+                type: 'string',
+                enum: ['low', 'medium', 'high'],
+                description: 'Text verbosity for GPT-5 models'
+              },
+              temperature: {
+                type: 'number',
+                description: 'Temperature for response generation (0-2)',
+                minimum: 0,
+                maximum: 2
+              },
+              max_completion_tokens: {
+                type: 'number',
+                description: 'Maximum tokens in completion'
+              },
+              wait_timeout_ms: {
+                type: 'number',
+                description: 'How long to wait for response in milliseconds',
+                default: 30000
+              }
+            },
+            required: ['model', 'prompt']
+          }
         }
       ]
     }));
@@ -118,6 +187,8 @@ export class PhoneAFriendServer {
             : await handleListModels(this.providers);
         } else if (name === 'advice') {
           return await handleAdvice(args, this.providers);
+        } else if (name === 'advice_async') {
+          return await handleAsyncAdvice(args as any, this.providers);
         }
         
         throw new MCPError(
