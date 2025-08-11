@@ -11,6 +11,7 @@ interface ModelDefinition {
   provider: 'openai' | 'google' | 'anthropic' | 'xai';
   name: string;
   reasoning?: boolean;
+  structuredOutput?: boolean;
   parameters?: {
     reasoningEffort?: 'minimal' | 'low' | 'medium' | 'high';
     verbosity?: 'low' | 'medium' | 'high';
@@ -21,20 +22,20 @@ interface ModelDefinition {
 const MODEL_REGISTRY: ModelDefinition[] = [
   // OpenAI Models
   // GPT-5 series (2025 release with reasoning)
-  { provider: 'openai', name: 'gpt-5', reasoning: true, parameters: { reasoningEffort: 'high', verbosity: 'high' } },
-  { provider: 'openai', name: 'gpt-5-mini', reasoning: true, parameters: { reasoningEffort: 'high', verbosity: 'low' } },
-  { provider: 'openai', name: 'gpt-5-nano', reasoning: true, parameters: { reasoningEffort: 'high', verbosity: 'low' } },
+  { provider: 'openai', name: 'gpt-5', reasoning: true, structuredOutput: true, parameters: { reasoningEffort: 'high', verbosity: 'low' } },
+  { provider: 'openai', name: 'gpt-5-mini', reasoning: true, structuredOutput: true, parameters: { reasoningEffort: 'high', verbosity: 'low' } },
+  { provider: 'openai', name: 'gpt-5-nano', reasoning: true, structuredOutput: true, parameters: { reasoningEffort: 'high', verbosity: 'low' } },
   
   // GPT-4.1 series (2025 release)
-  { provider: 'openai', name: 'gpt-4.1' },
-  { provider: 'openai', name: 'gpt-4.1-mini' },
-  { provider: 'openai', name: 'gpt-4.1-nano' },
+  { provider: 'openai', name: 'gpt-4.1', structuredOutput: true },
+  { provider: 'openai', name: 'gpt-4.1-mini', structuredOutput: true },
+  { provider: 'openai', name: 'gpt-4.1-nano', structuredOutput: true },
   
   // GPT-4o series
-  { provider: 'openai', name: 'gpt-4o' },
-  { provider: 'openai', name: 'gpt-4o-mini' },
-  { provider: 'openai', name: 'gpt-4-turbo' },
-  { provider: 'openai', name: 'gpt-3.5-turbo' },
+  { provider: 'openai', name: 'gpt-4o', structuredOutput: true },
+  { provider: 'openai', name: 'gpt-4o-mini', structuredOutput: true },
+  { provider: 'openai', name: 'gpt-4-turbo', structuredOutput: true },
+  { provider: 'openai', name: 'gpt-3.5-turbo', structuredOutput: true },
   
   // O-series reasoning models
   { provider: 'openai', name: 'o3', reasoning: true, parameters: { reasoningEffort: 'medium' } },
@@ -46,31 +47,31 @@ const MODEL_REGISTRY: ModelDefinition[] = [
   
   // Google Models
   // Gemini 1.x series
-  { provider: 'google', name: 'gemini-1.5-pro' },
-  { provider: 'google', name: 'gemini-1.5-flash' },
-  { provider: 'google', name: 'gemini-1.0-pro' },
+  { provider: 'google', name: 'gemini-1.5-pro', structuredOutput: true },
+  { provider: 'google', name: 'gemini-1.5-flash', structuredOutput: true },
+  { provider: 'google', name: 'gemini-1.0-pro', structuredOutput: true },
   
   // Gemini 2.0 series
-  { provider: 'google', name: 'gemini-2.0-flash' },
-  { provider: 'google', name: 'gemini-2.0-flash-preview-image-generation' },
+  { provider: 'google', name: 'gemini-2.0-flash', structuredOutput: true },
+  { provider: 'google', name: 'gemini-2.0-flash-preview-image-generation', structuredOutput: true },
   
   // Gemini 2.5 series (thinking models)
-  { provider: 'google', name: 'gemini-2.5-pro', reasoning: true },
-  { provider: 'google', name: 'gemini-2.5-flash', reasoning: true },
-  { provider: 'google', name: 'gemini-2.5-flash-lite' },
+  { provider: 'google', name: 'gemini-2.5-pro', reasoning: true, structuredOutput: true },
+  { provider: 'google', name: 'gemini-2.5-flash', reasoning: true, structuredOutput: true },
+  { provider: 'google', name: 'gemini-2.5-flash-lite', structuredOutput: true },
   
   // Anthropic Models
   // Claude 3 series
-  { provider: 'anthropic', name: 'claude-3-5-sonnet-20241022' },
-  { provider: 'anthropic', name: 'claude-3-5-haiku-20241022' },
-  { provider: 'anthropic', name: 'claude-3-opus-20240229' },
-  { provider: 'anthropic', name: 'claude-3-haiku-20240307' },
-  { provider: 'anthropic', name: 'claude-3-7-sonnet-20250219' },
+  { provider: 'anthropic', name: 'claude-3-5-sonnet-20241022', structuredOutput: true },
+  { provider: 'anthropic', name: 'claude-3-5-haiku-20241022', structuredOutput: true },
+  { provider: 'anthropic', name: 'claude-3-opus-20240229', structuredOutput: true },
+  { provider: 'anthropic', name: 'claude-3-haiku-20240307', structuredOutput: true },
+  { provider: 'anthropic', name: 'claude-3-7-sonnet-20250219', structuredOutput: true },
   
   // Claude 4 series (hybrid reasoning)
-  { provider: 'anthropic', name: 'claude-opus-4-1-20250805', reasoning: true },
-  { provider: 'anthropic', name: 'claude-opus-4-20250514', reasoning: true },
-  { provider: 'anthropic', name: 'claude-sonnet-4-20250514', reasoning: true },
+  { provider: 'anthropic', name: 'claude-opus-4-1-20250805', reasoning: true, structuredOutput: true },
+  { provider: 'anthropic', name: 'claude-opus-4-20250514', reasoning: true, structuredOutput: true },
+  { provider: 'anthropic', name: 'claude-sonnet-4-20250514', reasoning: true, structuredOutput: true },
   
   // XAI Models
   // Grok legacy
@@ -92,6 +93,12 @@ const MODEL_REGISTRY: ModelDefinition[] = [
 export const reasoningModels = new Set(
   MODEL_REGISTRY
     .filter(m => m.reasoning)
+    .map(m => m.name)
+);
+
+export const structuredOutputModels = new Set(
+  MODEL_REGISTRY
+    .filter(m => m.structuredOutput)
     .map(m => m.name)
 );
 
