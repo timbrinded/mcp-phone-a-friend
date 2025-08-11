@@ -4,7 +4,7 @@ import { setupProviders, type ProviderInfo } from './providers.js';
 import { generateText } from 'ai';
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import { MCPError, ErrorCode, validateString, wrapProviderError } from './errors.js';
-import { config } from './config.js';
+import { config, reasoningModels, modelParameters } from './config.js';
 
 export class PhoneAFriendServer {
   private server: Server;
@@ -83,6 +83,16 @@ export class PhoneAFriendServer {
               prompt: {
                 type: 'string',
                 description: 'The prompt to send to the model'
+              },
+              reasoningEffort: {
+                type: 'string',
+                enum: ['minimal', 'low', 'medium', 'high'],
+                description: 'Reasoning effort for OpenAI reasoning models (o3, GPT-5). Optional - uses model defaults if not specified'
+              },
+              verbosity: {
+                type: 'string', 
+                enum: ['low', 'medium', 'high'],
+                description: 'Text verbosity for GPT-5 models. Optional - uses model defaults if not specified'
               }
             },
             required: ['model', 'prompt']
@@ -213,6 +223,10 @@ export class PhoneAFriendServer {
       const model = validateString(params.model, 'model');
       const prompt = validateString(params.prompt, 'prompt');
       
+      // Optional parameters
+      const userReasoningEffort = params.reasoningEffort as string | undefined;
+      const userVerbosity = params.verbosity as string | undefined;
+      
       // Check if model exists
       const providerInfo = this.providers.get(model);
       if (!providerInfo) {
@@ -226,12 +240,47 @@ export class PhoneAFriendServer {
 
       // Extract provider name from model ID (e.g., "openai:gpt-4" -> "openai")
       const providerName = model.split(':')[0];
+      const modelName = model.split(':')[1];
 
       try {
-        const { text } = await generateText({
+        // Check if this is a reasoning model that needs special handling
+        const isReasoningModel = reasoningModels.has(modelName);
+        
+        // Build options based on model type
+        const generateOptions: any = {
           model: providerInfo.provider,
           prompt
-        });
+        };
+        
+        // Add provider-specific parameters based on model
+        if (isReasoningModel && providerName === 'openai') {
+          const providerOptions: any = {};
+          
+          // Get model-specific default parameters from configuration
+          const modelParams = (modelParameters as any)[modelName];
+          
+          // Use user-provided parameters or fall back to model defaults
+          if (userReasoningEffort || modelParams?.reasoningEffort) {
+            providerOptions.reasoningEffort = userReasoningEffort || modelParams.reasoningEffort;
+          }
+          
+          // Handle verbosity parameter for GPT-5 models
+          if (userVerbosity || modelParams?.verbosity) {
+            providerOptions.textVerbosity = userVerbosity || modelParams.verbosity;
+          }
+          
+          // Only add provider metadata if we have parameters to set
+          if (Object.keys(providerOptions).length > 0) {
+            generateOptions.experimental_providerMetadata = {
+              openai: providerOptions
+            };
+          }
+        }
+        // Note: Gemini 2.5 thinking models handle thinking internally
+        // Note: Claude 4 hybrid models handle reasoning internally
+        // Note: Grok-4 is always in reasoning mode
+        
+        const { text } = await generateText(generateOptions);
 
         return {
           content: [

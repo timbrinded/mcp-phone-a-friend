@@ -9,7 +9,7 @@
     "type": "git",
     "url": "https://github.com/yourusername/phone-a-friend-mcp"
   },
-  "bin": "./dist/src/run.js",
+  "bin": "./dist/run.js",
   "zshy": {
     "bin": "./src/run.ts",
     "exports": "./src/index.ts",
@@ -47,12 +47,12 @@
     "dist"
   ],
   "main": "./dist/index.cjs",
-  "module": "./dist/src/index.js",
-  "types": "./dist/src/index.d.ts",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/src/index.d.ts",
-      "import": "./dist/src/index.js"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     }
   }
 }

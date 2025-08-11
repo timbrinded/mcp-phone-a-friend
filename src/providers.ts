@@ -2,7 +2,7 @@ import { createOpenAI } from '@ai-sdk/openai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { createAnthropic } from '@ai-sdk/anthropic';
 import { createXai } from '@ai-sdk/xai';
-import { config } from './config.js';
+import { config, reasoningModels } from './config.js';
 
 export interface ProviderInfo {
   provider: any;
