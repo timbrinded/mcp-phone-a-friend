@@ -1,13 +1,13 @@
 {
   "name": "model-agency",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "packageManager": "bun@1.1.0",
   "license": "MIT",
   "description": "MCP server providing an agency of AI models for expert consultation and idiomatic code generation",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/model-agency"
+    "url": "https://github.com/timbrinded/model-agency-mcp"
   },
   "bin": "./dist/run.js",
   "zshy": {
@@ -52,6 +52,7 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "private": false,
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
