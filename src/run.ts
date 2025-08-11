@@ -1,8 +1,8 @@
 #!/usr/bin/env bun
-import { PhoneAFriendServer } from './server.js';
+import { ModelAgencyServer } from './server.js';
 
 async function main() {
-  const server = new PhoneAFriendServer();
+  const server = new ModelAgencyServer();
   await server.start();
 }
 

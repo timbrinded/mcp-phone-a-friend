@@ -6,13 +6,13 @@ import { MCPError, ErrorCode } from './errors.js';
 import { handleListModels, handleAdvice, handleModelsStatus, handleIdiom } from './handlers/index.js';
 import { handleAsyncAdvice, closeStore } from './handlers/advice-async.js';
 
-export class PhoneAFriendServer {
+export class ModelAgencyServer {
   private server: Server;
   private providers = new Map<string, ProviderInfo>();
 
   constructor() {
     this.server = new Server({
-      name: 'phone-a-friend',
+      name: 'model-agency',
       version: '1.0.0'
     }, {
       capabilities: {
@@ -42,7 +42,7 @@ export class PhoneAFriendServer {
       
       const transport = new StdioServerTransport();
       await this.server.connect(transport);
-      console.error('Phone-a-Friend MCP server started on stdio');
+      console.error('Model Agency MCP server started on stdio');
     } catch (error) {
       console.error('Failed to start server:', error);
       process.exit(1);

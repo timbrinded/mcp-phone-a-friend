@@ -29,7 +29,7 @@ describe("MCP Server Protocol Tests", () => {
       expect(response.result.protocolVersion).toBe("2024-11-05");
       expect(response.result.capabilities).toBeDefined();
       expect(response.result.serverInfo).toBeDefined();
-      expect(response.result.serverInfo.name).toBe("phone-a-friend");
+      expect(response.result.serverInfo.name).toBe("model-agency");
       expect(response.result.serverInfo.version).toBe("1.0.0");
     });
 

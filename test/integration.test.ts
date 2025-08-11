@@ -27,7 +27,7 @@ describe("MCP Integration Tests", () => {
       expect(isValidJsonRpcResponse(response)).toBeTrue();
       expect(response.result).toBeObject();
       expect(response.result).toContainKeys(["serverInfo"]);
-      expect(response.result.serverInfo.name).toBe("phone-a-friend");
+      expect(response.result.serverInfo.name).toBe("model-agency");
       
       // Step 2: List tools
       response = await listTools(server);
