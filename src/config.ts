@@ -33,9 +33,6 @@ const MODEL_REGISTRY: ModelDefinition[] = [
   
   // GPT-4o series
   { provider: 'openai', name: 'gpt-4o', structuredOutput: true },
-  { provider: 'openai', name: 'gpt-4o-mini', structuredOutput: true },
-  { provider: 'openai', name: 'gpt-4-turbo', structuredOutput: true },
-  { provider: 'openai', name: 'gpt-3.5-turbo', structuredOutput: true },
   
   // O-series reasoning models
   { provider: 'openai', name: 'o3', reasoning: true, parameters: { reasoningEffort: 'medium' } },
@@ -79,7 +76,6 @@ const MODEL_REGISTRY: ModelDefinition[] = [
   
   // Grok 2 series
   { provider: 'xai', name: 'grok-2' },
-  { provider: 'xai', name: 'grok-2-mini' },
   
   // Grok 3 series
   { provider: 'xai', name: 'grok-3' },
