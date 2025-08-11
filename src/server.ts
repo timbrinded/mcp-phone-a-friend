@@ -3,7 +3,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { setupProviders, type ProviderInfo } from './providers.js';
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import { MCPError, ErrorCode } from './errors.js';
-import { handleListModels, handleAdvice, handleModelsStatus } from './handlers/index.js';
+import { handleListModels, handleAdvice, handleModelsStatus, handleIdiom } from './handlers/index.js';
 import { handleAsyncAdvice, closeStore } from './handlers/advice-async.js';
 
 export class PhoneAFriendServer {
@@ -264,6 +264,71 @@ Returns current status: pending, complete, or error`,
             },
             required: ['model', 'prompt']
           }
+        },
+        {
+          name: 'idiom',
+          description: `Get the idiomatic, ecosystem-aware approach for tasks to prevent "AI slop".
+Best for: Preventing custom implementations when established solutions exist.
+
+Key features:
+• Enforces ecosystem best practices and conventions
+• Recommends existing packages over custom code
+• Identifies anti-patterns to avoid
+• Provides concrete code examples
+• Can reject bad approaches with explanations
+
+Examples:
+• "Store global state in React" → Use Zustand, not Context+useReducer
+• "Make HTTP requests with retry" → Use axios with axios-retry
+• "Interact with Ethereum" → Use viem, never raw JSON-RPC
+
+Requires comprehensive context for best results.`,
+          inputSchema: {
+            type: 'object',
+            properties: {
+              task: {
+                type: 'string',
+                description: 'The task or problem you need to accomplish'
+              },
+              current_approach: {
+                type: 'string',
+                description: 'Optional: Current code or approach to evaluate for idiomaticity'
+              },
+              context: {
+                type: 'object',
+                description: 'Environment context for accurate recommendations',
+                properties: {
+                  dependencies: {
+                    type: 'string',
+                    description: 'package.json, Cargo.toml, requirements.txt, or similar dependency file contents'
+                  },
+                  framework_config: {
+                    type: 'string',
+                    description: 'Framework configuration files (next.config.js, vite.config.js, etc.)'
+                  },
+                  existing_patterns: {
+                    type: 'array',
+                    items: { type: 'string' },
+                    description: 'Example files showing current code patterns in the project'
+                  },
+                  language: {
+                    type: 'string',
+                    description: 'Programming language (typescript, javascript, python, rust, etc.)'
+                  },
+                  constraints: {
+                    type: 'array',
+                    items: { type: 'string' },
+                    description: 'Any constraints like "no new dependencies" or "must be synchronous"'
+                  }
+                }
+              },
+              model: {
+                type: 'string',
+                description: 'Optional: Specific model to use for analysis (defaults to gpt-4o)'
+              }
+            },
+            required: ['task']
+          }
         }
       ]
     }));
@@ -282,6 +347,8 @@ Returns current status: pending, complete, or error`,
           return await handleAdvice(args, this.providers);
         } else if (name === 'advice_async') {
           return await handleAsyncAdvice(args as any, this.providers);
+        } else if (name === 'idiom') {
+          return await handleIdiom(args);
         }
         
         throw new MCPError(

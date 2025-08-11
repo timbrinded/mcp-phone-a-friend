@@ -146,11 +146,11 @@ export async function createAsyncResponse(params: CreateResponseParams): Promise
       });
       
       if (!response.ok) {
-        const error = await response.json().catch(() => ({ error: { message: response.statusText } }));
-        throw new Error(error.error?.message || `HTTP ${response.status}: ${response.statusText}`);
+        const errorData = await response.json().catch(() => ({ error: { message: response.statusText } }));
+        throw new Error((errorData as any).error?.message || `HTTP ${response.status}: ${response.statusText}`);
       }
       
-      const data: OpenAIResponsesAPIResponse = await response.json();
+      const data = await response.json() as OpenAIResponsesAPIResponse;
       
       // Convert to our AsyncResponse format
       let content = '';
@@ -208,11 +208,11 @@ export async function getResponseById(id: string): Promise<AsyncResponse> {
     });
     
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: { message: response.statusText } }));
-      throw new Error(error.error?.message || `HTTP ${response.status}: ${response.statusText}`);
+      const errorData = await response.json().catch(() => ({ error: { message: response.statusText } }));
+      throw new Error((errorData as any).error?.message || `HTTP ${response.status}: ${response.statusText}`);
     }
     
-    const data: OpenAIResponsesAPIResponse = await response.json();
+    const data = await response.json() as OpenAIResponsesAPIResponse;
     
     // Convert to our AsyncResponse format
     let content = '';
