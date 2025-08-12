@@ -48,6 +48,20 @@ Development mode:
 bun run dev
 ```
 
+## Model-Specific Limitations
+
+### o3 Models
+- **Temperature parameter is NOT supported** - will cause API errors if included
+- Use `reasoning_effort` instead for controlling output quality
+- Supports: `minimal`, `low`, `medium`, `high` reasoning levels
+
+### GPT-5 Models  
+- Supports `verbosity` parameter for output detail control
+- Temperature works as expected
+
+### Other Models
+- Standard parameters (temperature, top_p, etc.) work normally
+
 ## Available Tools
 
 ### models
@@ -84,7 +98,7 @@ Handle long-running AI operations with conversation support.
   "prompt": "Analyze this architecture...",
   "conversation_id": "uuid",     // For multi-turn
   "max_completion_tokens": 2000,
-  "temperature": 0.7,
+  // NOTE: temperature is NOT supported for o3 models
   "wait_timeout_ms": 120000
 }
 ```

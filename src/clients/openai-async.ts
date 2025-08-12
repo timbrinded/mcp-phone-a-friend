@@ -123,10 +123,14 @@ export async function createAsyncResponse(params: CreateResponseParams): Promise
         model: params.model,
         input,
         stream: false, // Disable streaming for async polling
-        temperature: params.temperature,
         top_p: params.top_p,
         max_output_tokens: params.max_completion_tokens // Note: different parameter name in Responses API
       };
+      
+      // o3 models do not support temperature parameter
+      if (!params.model.includes('o3')) {
+        requestBody.temperature = params.temperature;
+      }
       
       // Add reasoning effort for o1/o3 models
       if (params.reasoning_effort && (params.model.includes('o1') || params.model.includes('o3'))) {
@@ -270,10 +274,14 @@ export async function executeOpenAIRequest(params: CreateResponseParams): Promis
     const requestParams: any = {
       model: params.model,
       messages: params.messages,
-      temperature: params.temperature,
       top_p: params.top_p,
       max_completion_tokens: params.max_completion_tokens,
     };
+    
+    // o3 models do not support temperature parameter - will cause API errors if included
+    if (!params.model.includes('o3')) {
+      requestParams.temperature = params.temperature;
+    }
 
     // Add reasoning effort for o3/o1 models
     if (params.reasoning_effort && (params.model.includes('o3') || params.model.includes('o1'))) {
