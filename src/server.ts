@@ -175,10 +175,15 @@ Default: 'low' for efficiency`
           description: `Advanced async interface with multi-turn conversations and intelligent caching.
 Best for: Complex reasoning, long-running tasks, iterative refinement, context building.
 
-Key advantages over 'advice':
+⚠️ IMPORTANT: Only OpenAI models support true async operations via the Responses API.
+• OpenAI: Full async support with polling (gpt-4o, o3, o3-mini, o1, etc.)
+• Google Gemini: NOT SUPPORTED - falls back to synchronous execution
+• Anthropic Claude: NOT SUPPORTED - falls back to synchronous execution
+
+Key advantages over 'advice' (OpenAI models only):
 • Multi-turn conversation support with context preservation
 • Request caching and deduplication
-• Non-blocking for long operations
+• Non-blocking for long operations via OpenAI Responses API
 • Automatic context iteration (max 3 rounds)
 
 Conversation flow example:
@@ -195,8 +200,10 @@ Error prevention:
             properties: {
               model: {
                 type: 'string',
-                description: `Model ID (same format as 'advice' tool).
-Recommended for async: reasoning models like o3, GPT-5, gemini-2.5-pro`
+                description: `Model ID format: "provider:model-name"
+⚠️ Only OpenAI models support async operations:
+• Recommended: "openai:o3", "openai:o3-mini", "openai:gpt-5"
+• Non-OpenAI models will execute synchronously (no async benefits)`
               },
               prompt: {
                 type: 'string',

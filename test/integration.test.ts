@@ -32,7 +32,7 @@ describe("MCP Integration Tests", () => {
       // Step 2: List tools
       response = await listTools(server);
       expect(response.result.tools).toBeArray();
-      expect(response.result.tools).toHaveLength(3);
+      expect(response.result.tools).toHaveLength(4);
       
       // Step 3: Call models tool
       response = await callTool(server, "models");
@@ -232,7 +232,7 @@ describe("MCP Integration Tests", () => {
       // Should still list tools
       let response = await listTools(partialServer);
       expect(response.result.tools).toBeArray();
-      expect(response.result.tools).toHaveLength(3);
+      expect(response.result.tools).toHaveLength(4);
       
       // Models should only show OpenAI
       response = await callTool(partialServer, "models");
