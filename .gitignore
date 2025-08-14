@@ -17,3 +17,4 @@ scratchpad/*
 .env.production.local
 .claude
 .vscode
+**/chat.db*

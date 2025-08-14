@@ -85,29 +85,33 @@ Get AI assistance with automatic capability detection.
 ```
 
 Features:
+- Intelligent routing: OpenAI models use async, others use sync
 - Automatic structured output when supported
 - Fallback to text mode for incompatible models
 - Response includes confidence scores
 
-### advice_async
-Handle long-running AI operations with conversation support.
+**OpenAI models get additional features:**
+- Multi-turn conversation support (use `conversation_id`)
+- Request caching and deduplication
+- Non-blocking operations (poll with `request_id`)
+- Automatic context iteration (max 3 rounds)
 
 ```typescript
+// Example with OpenAI (async features enabled)
 {
   "model": "openai:o3",
   "prompt": "Analyze this architecture...",
   "conversation_id": "uuid",     // For multi-turn
   "max_completion_tokens": 2000,
-  // NOTE: temperature is NOT supported for o3 models
   "wait_timeout_ms": 120000
 }
-```
 
-Features:
-- Multi-turn conversation support
-- Request caching and deduplication
-- Non-blocking operations
-- Automatic context iteration (max 3 rounds)
+// Example with Google (standard sync)
+{
+  "model": "google:gemini-2.5-flash",
+  "prompt": "Quick code review..."
+}
+```
 
 ### idiom
 Get ecosystem-aware implementation approaches.

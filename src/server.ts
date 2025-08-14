@@ -3,8 +3,8 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { setupProviders, type ProviderInfo } from './providers.js';
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import { MCPError, ErrorCode } from './errors.js';
-import { handleListModels, handleAdvice, handleModelsStatus, handleIdiom } from './handlers/index.js';
-import { handleAsyncAdvice, closeStore } from './handlers/advice-async.js';
+import { handleListModels, handleUnifiedAdvice, handleModelsStatus, handleIdiom } from './handlers/index.js';
+import { closeStore } from './handlers/advice-async.js';
 
 export class ModelAgencyServer {
   private server: Server;
@@ -97,20 +97,28 @@ Use 'detailed=true' to see full capabilities matrix, configuration status, and s
         },
         {
           name: 'advice',
-          description: `Get expert advice from AI models with automatic capability detection.
+          description: `Get expert advice from AI models with intelligent routing and automatic capability detection.
 Best for: code review, debugging, architecture decisions, implementation guidance, explanations.
 
 Key features:
+• Automatic async support for OpenAI models (via Responses API)
+• Synchronous execution for other providers (Google, Anthropic, etc.)
+• Multi-turn conversation support (OpenAI only)
 • Automatic structured output detection - returns JSON when supported
 • Smart fallback to text for incompatible models
 • Response includes confidence scores and context requests
 • Optimized timeouts based on model type
+• Request caching and deduplication (OpenAI async mode)
 
 Response formats:
 • Structured (when supported): {response_type, response, confidence, context_needed}
 • Text fallback: Simple text response with metadata.fallback_mode=true
 
-Use 'advice_async' for complex reasoning tasks or multi-turn conversations`,
+OpenAI models benefit from:
+• Non-blocking operations for long-running tasks
+• Poll for completion with request_id
+• Conversation context preservation
+• Automatic context iteration (max 3 rounds)`,
           inputSchema: {
             type: 'object',
             properties: {
@@ -165,54 +173,10 @@ Default: model-specific optimal setting`
 • high: Detailed with examples - learning/documentation
 
 Default: 'low' for efficiency`
-              }
-            },
-            required: ['model', 'prompt']
-          }
-        },
-        {
-          name: 'advice_async',
-          description: `Advanced async interface with multi-turn conversations and intelligent caching.
-Best for: Complex reasoning, long-running tasks, iterative refinement, context building.
-
-⚠️ IMPORTANT: Only OpenAI models support true async operations via the Responses API.
-• OpenAI: Full async support with polling (gpt-4o, o3, o3-mini, o1, etc.)
-• Google Gemini: NOT SUPPORTED - falls back to synchronous execution
-• Anthropic Claude: NOT SUPPORTED - falls back to synchronous execution
-
-Key advantages over 'advice' (OpenAI models only):
-• Multi-turn conversation support with context preservation
-• Request caching and deduplication
-• Non-blocking for long operations via OpenAI Responses API
-• Automatic context iteration (max 3 rounds)
-
-Conversation flow example:
-1. Initial prompt → response_type: 'needs_context' (missing info)
-2. Add context via additional_context → response_type: 'continue'
-3. Final clarification → response_type: 'complete'
-
-Error prevention:
-• Max 3 iterations to prevent infinite loops
-• Automatic context aggregation
-• Request deduplication for identical prompts`,
-          inputSchema: {
-            type: 'object',
-            properties: {
-              model: {
-                type: 'string',
-                description: `Model ID format: "provider:model-name"
-⚠️ Only OpenAI models support async operations:
-• Recommended: "openai:o3", "openai:o3-mini", "openai:gpt-5"
-• Non-OpenAI models will execute synchronously (no async benefits)`
-              },
-              prompt: {
-                type: 'string',
-                description: `Initial prompt or follow-up message in conversation.
-For follow-ups, reference previous context naturally.`
               },
               conversation_id: {
                 type: 'string',
-                description: `Conversation ID for multi-turn dialogue.
+                description: `[OpenAI models only] Conversation ID for multi-turn dialogue.
 • Auto-generated UUID if not provided
 • Preserves context across multiple calls
 • Use same ID to continue conversation
@@ -220,30 +184,20 @@ For follow-ups, reference previous context naturally.`
               },
               request_id: {
                 type: 'number',
-                description: `Check status of existing async request.
+                description: `[OpenAI models only] Check status of existing async request.
 • Required for polling long-running operations
 • Returned in initial response metadata
 • Use to retrieve cached results`
               },
               check_status: {
                 type: 'boolean',
-                description: `Poll for request completion (requires request_id).
+                description: `[OpenAI models only] Poll for request completion (requires request_id).
 Returns current status: pending, complete, or error`,
                 default: false
               },
-              reasoning_effort: {
-                type: 'string',
-                enum: ['minimal', 'low', 'medium', 'high'],
-                description: `Same as 'advice' tool - controls o3/GPT-5 reasoning depth`
-              },
-              verbosity: {
-                type: 'string',
-                enum: ['low', 'medium', 'high'],
-                description: `Same as 'advice' tool - controls GPT-5 output detail`
-              },
               temperature: {
                 type: 'number',
-                description: `Response creativity (0-2):
+                description: `[OpenAI models only] Response creativity (0-2):
 • 0: Deterministic, same response each time
 • 0.7: Balanced creativity (default)
 • 1.0: Creative responses
@@ -253,7 +207,7 @@ Returns current status: pending, complete, or error`,
               },
               max_completion_tokens: {
                 type: 'number',
-                description: `Output length limit in tokens (~4 chars/token).
+                description: `[OpenAI models only] Output length limit in tokens (~4 chars/token).
 • Short answer: 500 tokens
 • Standard: 2000 tokens (default)
 • Detailed: 4000 tokens
@@ -261,7 +215,7 @@ Returns current status: pending, complete, or error`,
               },
               wait_timeout_ms: {
                 type: 'number',
-                description: `Max wait time before returning pending status.
+                description: `[OpenAI models only] Max wait time before returning pending status.
 • Default: 30000ms (30s) for fast models
 • Reasoning models auto-extend to 120000ms
 • Set lower for quick status checks
@@ -351,9 +305,7 @@ Requires comprehensive context for best results.`,
             ? await handleModelsStatus(this.providers)
             : await handleListModels(this.providers);
         } else if (name === 'advice') {
-          return await handleAdvice(args, this.providers);
-        } else if (name === 'advice_async') {
-          return await handleAsyncAdvice(args as any, this.providers);
+          return await handleUnifiedAdvice(args, this.providers);
         } else if (name === 'idiom') {
           return await handleIdiom(args);
         }

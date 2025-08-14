@@ -1,6 +1,6 @@
 {
   "name": "model-agency",
-  "version": "1.0.4",
+  "version": "2.0.0",
   "type": "module",
   "packageManager": "bun@1.1.0",
   "license": "MIT",
